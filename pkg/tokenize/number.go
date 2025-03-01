@@ -2,7 +2,14 @@ package tokenize
 
 import (
 	"bytes"
+	"errors"
 	"io"
+)
+
+var (
+	ErrUnexpectedDecimal  = errors.New("unexpected decimal character")
+	ErrUnexpectedExponent = errors.New("unexpected exponent character")
+	ErrUnexpectedSign     = errors.New("unexpected sign character")
 )
 
 func consumeLiteralNumber(b []byte, atEOF bool) (int, []byte, error) {
@@ -12,29 +19,66 @@ func consumeLiteralNumber(b []byte, atEOF bool) (int, []byte, error) {
 		return 0, nil, nil
 	}
 
-	isNumeral := func(r rune) bool { return r >= '0' && r <= '9' }
-	isSigned := func(r rune) bool { return r == '-' || r == '+' }
-	isIEEE754E := func(r rune) bool { return r == 'e' || r == 'E' }
-	isDecimal := func(r rune) bool { return r == '.' || isNumeral(r) || isSigned(r) }
-	isNonNumeric := func(r rune) bool { return !(isDecimal(r) || isIEEE754E(r)) }
+	var closedAt int
+	var sign bool
+	var decimal bool
+	var exponent bool
 
-	length := bytes.IndexFunc(b, isNonNumeric)
-	if length == -1 && !atEOF {
-		return 0, nil, nil
-	} else if length == -1 {
-		length = len(b)
-	}
-
-	if bytes.IndexFunc(b[:length], isIEEE754E) != -1 {
-		ieee754 := bytes.FieldsFunc(b[:length], isIEEE754E)
-		if len(ieee754) > 2 {
-			return 0, nil, ErrUnmatched
-		} else if bytes.IndexFunc(ieee754[0], isNonNumeric) != -1 {
-			return 0, nil, ErrUnmatched
-		} else if bytes.IndexFunc(ieee754[1], isNonNumeric) != -1 {
-			return 0, nil, ErrUnmatched
+Consuming:
+	for i := range b {
+		switch b[i] {
+		case '-', '+':
+			if sign {
+				return 0, nil, ErrUnexpectedSign
+			}
+			sign = true
+		case '.':
+			if decimal {
+				return 0, nil, ErrUnexpectedDecimal
+			}
+			decimal = true
+		case 'e', 'E':
+			if exponent {
+				return 0, nil, ErrUnexpectedExponent
+			}
+			exponent = true
+			sign, decimal = false, false
+		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+			continue Consuming
+		case 'N':
+			switch {
+			case i == 0 && bytes.HasPrefix(b, Token{'N', 'a', 'N'}):
+				closedAt = 3
+			default:
+				closedAt = i
+			}
+			break Consuming
+		case 'I':
+			switch {
+			case i == 0 && bytes.HasPrefix(b, Token{'I', 'n', 'f'}):
+				closedAt = 3
+			case i == 1 && sign && bytes.HasPrefix(b[1:], Token{'I', 'n', 'f'}):
+				closedAt = 4
+			default:
+				closedAt = i
+			}
+			break Consuming
+		default:
+			closedAt = i
+			break Consuming
 		}
 	}
 
-	return length, b[:length], nil
+	switch {
+	case closedAt == 0 && atEOF:
+		return len(b), b, nil
+	case closedAt == 0 && !atEOF:
+		return 0, nil, nil
+	case closedAt == len(b)-1 && atEOF:
+		return len(b), b, nil
+	case closedAt == len(b)-1 && !atEOF:
+		return 0, nil, nil
+	default:
+		return closedAt, b[:closedAt], nil
+	}
 }
