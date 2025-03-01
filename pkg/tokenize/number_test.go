@@ -81,24 +81,24 @@ func TestConsumeLiteralNumber(t *testing.T) {
 			Reason: "Signed integer and decimal tests",
 			Cases: []testcase{
 				{
-					Reason: "",
+					Reason: "signed numeral, negative",
 					In:     input{Token: Token("-1"), AtEOF: true},
 					Out:    output{N: 2, Token: Token("-1"), Err: nil},
 				},
 
 				{
-					Reason: "",
+					Reason: "signed numeral, positive",
 					In:     input{Token: Token("+1"), AtEOF: true},
 					Out:    output{N: 2, Token: Token("+1"), Err: nil},
 				},
 				{
-					Reason: "",
+					Reason: "signed decimal, negative",
 					In:     input{Token: Token("-1.107"), AtEOF: true},
 					Out:    output{N: 6, Token: Token("-1.107"), Err: nil},
 				},
 
 				{
-					Reason: "",
+					Reason: "signed decimal, positive",
 					In:     input{Token: Token("+1.107"), AtEOF: true},
 					Out:    output{N: 6, Token: Token("+1.107"), Err: nil},
 				},
@@ -109,37 +109,37 @@ func TestConsumeLiteralNumber(t *testing.T) {
 			Reason: "Scientific-notation number tests",
 			Cases: []testcase{
 				{
-					Reason: "",
+					Reason: "plain significand-mantissa token",
 					In:     input{Token: Token("1e2.789"), AtEOF: true},
 					Out:    output{N: 7, Token: Token("1e2.789"), Err: nil},
 				},
 				{
-					Reason: "",
-					In:     input{Token: Token("+1e2.789"), AtEOF: true},
-					Out:    output{N: 8, Token: Token("+1e2.789"), Err: nil},
-				},
-				{
-					Reason: "",
+					Reason: "signed significand, negative",
 					In:     input{Token: Token("-1e2.789"), AtEOF: true},
 					Out:    output{N: 8, Token: Token("-1e2.789"), Err: nil},
 				},
 				{
-					Reason: "",
+					Reason: "signed significand, positive",
+					In:     input{Token: Token("+1e2.789"), AtEOF: true},
+					Out:    output{N: 8, Token: Token("+1e2.789"), Err: nil},
+				},
+				{
+					Reason: "signed mantissa, negative",
 					In:     input{Token: Token("1e-2.789"), AtEOF: true},
 					Out:    output{N: 8, Token: Token("1e-2.789"), Err: nil},
 				},
 				{
-					Reason: "",
+					Reason: "signed mantissa, positive",
 					In:     input{Token: Token("1e+2.789"), AtEOF: true},
 					Out:    output{N: 8, Token: Token("1e+2.789"), Err: nil},
 				},
 				{
-					Reason: "",
+					Reason: "negative significand, positive mantissa",
 					In:     input{Token: Token("-1e+2.789"), AtEOF: true},
 					Out:    output{N: 9, Token: Token("-1e+2.789"), Err: nil},
 				},
 				{
-					Reason: "",
+					Reason: "positive significand, negative mantissa,",
 					In:     input{Token: Token("+1e-2.789"), AtEOF: true},
 					Out:    output{N: 9, Token: Token("+1e-2.789"), Err: nil},
 				},
@@ -204,7 +204,7 @@ func TestConsumeLiteralNumber(t *testing.T) {
 					Out:    output{N: 0, Token: nil, Err: io.EOF},
 				},
 				{
-					Reason: "",
+					Reason: "zero-length, but !atEOF",
 					In:     input{Token: nil, AtEOF: false},
 					Out:    output{N: 0, Token: nil, Err: nil},
 				},
