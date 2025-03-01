@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestScanLiteralNumber(t *testing.T) {
+func TestConsumeLiteralNumber(t *testing.T) {
 	scenarios := []string{
 		"1",
 		"1.1",
@@ -14,7 +14,7 @@ func TestScanLiteralNumber(t *testing.T) {
 	}
 
 	for i := range scenarios {
-		i, b, err := scanLiteralNumber(Token(scenarios[i]), false)
+		i, b, err := consumeLiteralNumber(Token(scenarios[i]), false)
 		switch {
 		case i < 1:
 			t.Errorf("expected to consume at least 1 byte; got %d bytes", i)
