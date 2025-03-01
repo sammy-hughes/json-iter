@@ -18,19 +18,18 @@ var TestLiterals = `[true,false,null,1,1.1e0,1.1e+1,1.1e-1,0,0.0," "]`
 
 func TestSplitTokens_TestLiterals() {
 	reader := bytes.NewReader(tokenize.Token(TestLiterals))
-	scanner := bufio.NewScanner(reader)
-	scanner.Split(tokenize.Tokens)
+	seq := tokenize.Tokens(reader)
 
 	fmt.Println("starting up")
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+	for b := range seq {
+		fmt.Println(string(b))
 	}
 }
 
 func TestSplitTokens_TestData() {
 	reader := bytes.NewReader(tokenize.Token(TestData))
 	scanner := bufio.NewScanner(reader)
-	scanner.Split(tokenize.Tokens)
+	scanner.Split(tokenize.SplitTokens)
 
 	fmt.Println("starting up")
 	for scanner.Scan() {

@@ -28,7 +28,7 @@ func consumeLiteralConstant(b, token []byte, atEOF bool) (int, []byte, error) {
 	}
 }
 
-func Tokens(b []byte, atEOF bool) (int, []byte, error) {
+func SplitTokens(b []byte, atEOF bool) (int, []byte, error) {
 	if len(b) < 1 && atEOF {
 		return 0, nil, io.EOF
 	} else if len(b) < 1 {
@@ -59,7 +59,7 @@ func Tokens(b []byte, atEOF bool) (int, []byte, error) {
 	case ':':
 		return consumeLiteralColon(b, atEOF)
 	case '\n', '\r', '\t', ' ':
-		n, b, atEOF := Tokens(b[1:], atEOF)
+		n, b, atEOF := SplitTokens(b[1:], atEOF)
 		return n + 1, b, atEOF
 	}
 
