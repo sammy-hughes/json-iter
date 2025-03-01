@@ -3,6 +3,7 @@ package tokenize
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
 )
 
@@ -69,14 +70,11 @@ Consuming:
 		}
 	}
 
+	fmt.Println("Yo!", closedAt)
 	switch {
 	case closedAt == 0 && atEOF:
 		return len(b), b, nil
 	case closedAt == 0 && !atEOF:
-		return 0, nil, nil
-	case closedAt == len(b)-1 && atEOF:
-		return len(b), b, nil
-	case closedAt == len(b)-1 && !atEOF:
 		return 0, nil, nil
 	default:
 		return closedAt, b[:closedAt], nil
